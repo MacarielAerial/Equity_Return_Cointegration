@@ -15,13 +15,14 @@ period = '1d'
 start = '2012-1-1'
 end = datetime.now().date()
 url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DCOILWTICO&scale=left&cosd=2012-01-01&coed=2020-03-06&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=lin&fgsnd=2009-06-01&line_index=1&transformation=lin&vintage_date=2020-03-13&revision_date=2020-03-13&nd=1986-01-02'
+interim_folder_path = 'interim_files/'
 
 # Module 1
 class Data:
 	'''Loads input data'''
-	def __init__(self, ticker_list, period, start, end, url, aux_col_lab = 'Oil_Price'):
+	def __init__(self, ticker_list, period, start, end, url, interim_folder_path, aux_col_lab = 'Oil_Price'):
 		# Initiate variables
-		self.ticker_list, self.period, self.start, self.end, self.url, self.aux_col_lab = ticker_list, period, start, end, url, aux_col_lab
+		self.ticker_list, self.period, self.start, self.end, self.url, self.aux_col_lab, self.interim_folder_path = ticker_list, period, start, end, url, aux_col_lab, interim_folder_path
 		self.head = None
 		self.df_list = []
 		self.df_main = pd.DataFrame()
@@ -55,10 +56,15 @@ class Data:
 		'''Merge the main and the aux data matrices together'''
 		self.df = pd.merge(self.df_main, self.df_aux, left_index = True, right_index = True)
 
+	def interim_data_export(self):
+		'''Export the intermediary dataframe object (merged data) to csv'''
+		self.df.to_csv(self.interim_folder_path + 'master_data.csv', index = 'date')
+
 	def exec(self):
 		self.main_data_import()
 		self.aux_data_import()
 		self.merge_data()
+		self.interim_data_export()
 
 # Module 2
 class Aux:
@@ -75,5 +81,5 @@ class Aux:
 
 # Conditional execution lines
 if __name__ == '__main__':
-	obj = Data(ticker_list, period, start, end, url)
+	obj = Data(ticker_list, period, start, end, url, interim_folder_path)
 	obj.exec()
