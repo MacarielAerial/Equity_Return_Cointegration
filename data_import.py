@@ -4,6 +4,7 @@ This module imports stock price data
 
 # import libraries
 import csv
+import numpy as np
 import pandas as pd
 import yfinance as yf
 import requests
@@ -47,6 +48,10 @@ class Data:
 		'''Merge the main and the aux data matrices together'''
 		self.df = pd.merge(self.df_main, self.df_aux, left_index = True, right_index = True)
 
+	def data_clean(self):
+		'''Flag the nans in the data'''
+		self.df = self.df.replace('.', np.nan)
+
 	def interim_data_export(self):
 		'''Export the intermediary dataframe object (merged data) to csv'''
 		self.df.to_csv(self.interim_folder_path + 'master_data.csv', index = 'date')
@@ -55,8 +60,11 @@ class Data:
 		self.main_data_import()
 		self.aux_data_import()
 		self.merge_data()
+		self.data_clean()
 		self.interim_data_export()
+		print('*'*10 + 'An sample of cleaned data:' + '*'*10)
 		print(self.df.head())
+		print('*'*10 + '*'*len('An sample of cleaned data:') + '*'*10)
 
 # Module 2
 class Aux:
