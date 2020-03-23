@@ -13,6 +13,10 @@ import statsmodels.api as sm
 from sklearn.model_selection import train_test_split
 from arch import arch_model
 
+# Configurations
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
+
 # Define global variables
 ticker_list = ['HMC', 'TKS']
 period = '1d'
@@ -52,9 +56,11 @@ class Analysis:
 		print(self.linear_result.summary())
 		y_test_hat = self.linear_result.predict(self.X_test)
 		fig, ax = plt.subplots(figsize = (16, 9))
-		ax.plot(self.y_test.index.values.tolist(), self.y_test, 'o', label = 'Data')
-		ax.plot(self.y_test.index.values.tolist(), y_test_hat, 'r', label = 'OLS Prediction')
+		ax.plot(self.y_test.index, self.y_test, 'o', label = 'Data')
+		ax.plot(self.y_test.index, y_test_hat, 'r', label = 'OLS Prediction')
 		ax.set_title('OLS Model Prediction of HMC Stock Return')
+		ax.set_xlabel('Date')
+		ax.set_ylabel('Stock Return in %')
 		ax.legend(loc = 'best')
 		plt.savefig('Linear_Model_Result.png', dpi = 300)
 
