@@ -11,21 +11,23 @@ import requests
 from datetime import datetime
 
 # Define global variables
-ticker_list = ['HMC', 'TKS']
+ticker_list = ['HMC', '7313.T']
 period = '1d'
 start = '2000-01-01'
 end = str(datetime.now().date())
 oil_url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DCOILWTICO&scale=left&cosd=' + start + '&coed=' + end + '&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=lin&fgsnd=2009-06-01&line_index=1&transformation=lin&vintage_date=2020-03-16&revision_date=2020-03-16&nd=1986-01-02'
 ffr_url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=EFFR&scale=left&cosd=' + start + '&coed=' + end + '&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=lin&fgsnd=2009-06-01&line_index=1&transformation=lin&vintage_date=2020-03-16&revision_date=2020-03-16&nd=2000-07-03'
+forex_url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DEXJPUS&scale=left&cosd=' + start + '&coed=' + end + '&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=lin&fgsnd=2009-06-01&line_index=1&transformation=lin&vintage_date=2020-03-29&revision_date=2020-03-29&nd=1971-01-04'
 interim_folder_path = 'interim_files/'
-aux_col_lab = ['Oil_Price', 'FFR']
+aux_col_lab = ['Oil_Price', 'FFR', 'FOREX']
+adjusted_col = ['Open_7313.T', 'High_7313.T', 'Low_7313.T', 'Close_7313.T', 'Dividends_7313.T']
 
 # Module 1
 class Data:
 	'''Loads input data'''
-	def __init__(self, ticker_list, period, start, end, oil_url, ffr_url, interim_folder_path, aux_col_lab = aux_col_lab):
+	def __init__(self, ticker_list, period, start, end, oil_url, ffr_url, forex_url, interim_folder_path, aux_col_lab, adjusted_col):
 		# Initiate variables
-		self.ticker_list, self.period, self.start, self.end, self.oil_url, self.ffr_url, self.aux_col_lab, self.interim_folder_path = ticker_list, period, start, end, oil_url, ffr_url, aux_col_lab, interim_folder_path
+		self.ticker_list, self.period, self.start, self.end, self.oil_url, self.ffr_url, self.forex_url, self.aux_col_lab, self.interim_folder_path, self.aux_col_lab, self.adjusted_col = ticker_list, period, start, end, oil_url, ffr_url, forex_url, aux_col_lab, interim_folder_path, aux_col_lab, adjusted_col
 		self.head = None
 		self.df_list = []
 		self.df_main = pd.DataFrame()
@@ -43,6 +45,7 @@ class Data:
 
 	def aux_data_import(self):
 		self.df_aux = pd.merge(Aux.load_one_series(self.oil_url, self.aux_col_lab[0]), Aux.load_one_series(self.ffr_url, self.aux_col_lab[1]), how = 'inner', on = 'date')
+		self.df_aux = self.df_aux.merge(Aux.load_one_series(self.forex_url, self.aux_col_lab[2]), how = 'inner', on = 'date')
 
 	def merge_data(self):
 		'''Merge the main and the aux data matrices together'''
@@ -51,6 +54,10 @@ class Data:
 	def data_clean(self):
 		'''Flag the nans in the data'''
 		self.df = self.df.replace('.', np.nan)
+		self.df = self.df.astype('float32')
+		self.df.dropna(inplace = True)
+		for col in self.adjusted_col:
+			self.df[col + '_ex'] = self.df[col]/self.df['FOREX']
 
 	def interim_data_export(self):
 		'''Export the intermediary dataframe object (merged data) to csv'''
@@ -96,5 +103,5 @@ class Aux:
 
 # Conditional execution lines
 if __name__ == '__main__':
-	obj = Data(ticker_list, period, start, end, oil_url, ffr_url, interim_folder_path, aux_col_lab)
+	obj = Data(ticker_list, period, start, end, oil_url, ffr_url, forex_url, interim_folder_path, aux_col_lab, adjusted_col)
 	obj.exec()

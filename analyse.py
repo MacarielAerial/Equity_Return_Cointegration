@@ -18,16 +18,18 @@ from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 # Define global variables
-ticker_list = ['HMC', 'TKS']
+ticker_list = ['HMC', '7313.T']
 period = '1d'
 start = '2000-01-01'
 end = str(datetime.now().date())
 oil_url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DCOILWTICO&scale=left&cosd=' + start + '&coed=' + end + '&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=lin&fgsnd=2009-06-01&line_index=1&transformation=lin&vintage_date=2020-03-16&revision_date=2020-03-16&nd=1986-01-02'
 ffr_url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=EFFR&scale=left&cosd=' + start + '&coed=' + end + '&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=lin&fgsnd=2009-06-01&line_index=1&transformation=lin&vintage_date=2020-03-16&revision_date=2020-03-16&nd=2000-07-03'
+forex_url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DEXJPUS&scale=left&cosd=' + start + '&coed=' + end + '&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=lin&fgsnd=2009-06-01&line_index=1&transformation=lin&vintage_date=2020-03-29&revision_date=2020-03-29&nd=1971-01-04'
 interim_folder_path = 'interim_files/'
-aux_col_lab = ['Oil_Price', 'FFR']
+aux_col_lab = ['Oil_Price', 'FFR', 'FOREX']
 target = 'Close_HMC'
-features = ['Volume_HMC', 'Close_TKS', 'Volume_TKS', 'Oil_Price', 'FFR']
+features = ['Volume_HMC', 'Close_7313.T_ex', 'Volume_7313.T', 'Oil_Price', 'FFR']
+adjusted_col = ['Open_7313.T', 'High_7313.T', 'Low_7313.T', 'Close_7313.T', 'Dividends_7313.T']
 
 class Analysis:
 	def __init__(self, input_data, target, features, split = 0.8):
@@ -73,7 +75,7 @@ class Analysis:
 
 
 if __name__ == '__main__':
-	obj = Data(ticker_list, period, start, end, oil_url, ffr_url, interim_folder_path, aux_col_lab)
+	obj = Data(ticker_list, period, start, end, oil_url, ffr_url, forex_url, interim_folder_path, aux_col_lab, adjusted_col)
 	obj.exec()
 	obj_2 = Analysis(obj.df, target, features)
 	obj_2.exec()
